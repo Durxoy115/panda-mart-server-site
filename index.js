@@ -4,7 +4,8 @@ const app = express();
 const cors = require("cors");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
-
+const { ObjectId } = require("mongodb");
+const { query, response } = require("express");
 app.use(cors());
 app.use(express.json());
 
@@ -37,6 +38,32 @@ async function run() {
       const singleProduct = await productCollection.findOne(query);
       res.send(singleProduct);
     });
+
+    app.get("/product/category/:category", async (req, res) => {
+      const category = req.params.category;
+      const query = { category: category };
+      const cursor = productCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // //Get Search Result
+    // app.get("/search", async (req, res) => {
+    //   const filters = req.query;
+    //   console.log(filters)
+    //   const products = await productCollection.find({}).toArray();
+    //   let filteredProducts = [];
+    //   products.filter((product) => {
+    //     const lowerCaseName = product.name.toLowerCase();
+    //     for (key in filters) {
+    //       const filterName = filters[key].toLowerCase();
+    //       if (lowerCaseName.includes(filterName)) {
+    //         filteredProducts.push(product);
+    //       }
+    //     }
+    //   });
+    //   console.log(filteredProducts);
+    // });
 
     app.post("/addproduct", async (req, res) => {
       const addProduct = req.body;
@@ -89,7 +116,7 @@ async function run() {
     app.get("/admin/:email", async (req, res) => {
       const email = req.params.email;
       const user = await userCollection.findOne({ email: email });
-      const isAdmin = user.roll === "admin";
+      const isAdmin = user?.roll === "admin";
       res.send({ admin: isAdmin });
     });
 
